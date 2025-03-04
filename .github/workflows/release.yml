@@ -103,18 +103,28 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-yarn-
 
-      # 安装依赖执行构建，以及推送 github release
-      - name: Install app dependencies and build it
-        env:
-          NODE_ENV: production
-          # 为 esbuild 设置更现代的目标环境
-          ESBUILD_TARGET: es2022
-        run: yarn && yarn build
+      # 确保安装依赖并验证安装结果
+      - name: Install dependencies
+        run: |
+          yarn install
+          # 列出已安装的包，以便调试
+          yarn list vite
 
       # 可以添加 macOS 特定的构建优化（如果有需要）
       - name: Set macOS specific variables
         if: matrix.platform == 'macos-latest'
         run: echo "Building for macOS only"
+
+      # 使用 npx 执行 vite build 命令，确保使用本地安装的 vite
+      - name: Build application
+        env:
+          NODE_ENV: production
+          ESBUILD_TARGET: es2022
+        run: |
+          # 确保 node_modules/.bin 在 PATH 中
+          export PATH="$PWD/node_modules/.bin:$PATH"
+          # 执行构建
+          yarn build || npx vite build
 
       - uses: tauri-apps/tauri-action@v0
         env:

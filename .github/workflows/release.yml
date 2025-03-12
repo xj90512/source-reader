@@ -68,23 +68,16 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 18
-          cache: 'yarn'  # 启用 Node.js 包缓存
 
       # 安装 Rust
       - name: Install Rust stable
         uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
-          target: aarch64-apple-darwin  # 添加 Apple Silicon 支持
-          components: rustfmt, clippy   # 添加必要的 Rust 组件
-
-      # 使用 Rust 缓存，加快安装速度
-      - uses: Swatinem/rust-cache@v2    # 更新到 v2 版本
-        with:
-          cache-on-failure: true
+          target: aarch64-apple-darwin
+          components: rustfmt, clippy
 
       # 移除 Ubuntu 特定依赖安装步骤，因为我们不再构建 Ubuntu 版本
-      # 或者保留并继续使用条件判断，以便将来可以轻松恢复多平台构建
       - name: install dependencies (ubuntu only)
         if: matrix.platform == 'ubuntu-latest'
         run: |
@@ -94,41 +87,30 @@ jobs:
       # 可选，如果需要将 Rust 编译为 wasm，则安装 wasm-pack
       - uses: jetli/wasm-pack-action@v0.3.0
         with:
-          # Optional version of wasm-pack to install(eg. 'v0.9.1', 'latest')
           version: v0.9.1
 
       # 可选，如果需要使用 rsw 构建 wasm，则安装 rsw
       - name: Install rsw
         run: cargo install rsw
 
-      # 获取 yarn 缓存路径
-      - name: Get yarn cache directory path
-        id: yarn-cache-dir-path
-        run: echo "dir=$(yarn config get cacheFolder)" >> $GITHUB_OUTPUT
-
-      # 使用 yarn 缓存 - 更新到 v3
-      - name: Yarn cache
-        uses: actions/cache@v3
-        id: yarn-cache
-        with:
-          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-
-
       # 确保安装依赖并验证安装结果
       - name: Install dependencies
         run: |
-          yarn install --frozen-lockfile
+          yarn install
           yarn add @tauri-apps/cli@latest
           yarn add @tauri-apps/api@latest
           
       # 构建前清理
       - name: Clean build artifacts
         run: |
+          rm -rf node_modules
           rm -rf dist
           rm -rf src-tauri/target
-
+          
+      # 重新安装依赖
+      - name: Reinstall dependencies
+        run: yarn install
+          
       # 使用 npx 执行 vite build 命令
       - name: Build Frontend
         env:

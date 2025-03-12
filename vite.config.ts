@@ -5,12 +5,15 @@ import {resolve} from 'path'
 import {createSvgIconsPlugin} from 'vite-plugin-svg-icons'
 import vueSetupExtend from 'vite-plugin-vue-setup-extend'
 // https://vitejs.dev/config/
-export default defineConfig(async () => ({
-    plugins: [vue(),
+export default defineConfig({
+    plugins: [
+        vue(),
         vueSetupExtend(),
         createSvgIconsPlugin({
             iconDirs: [resolve(__dirname, 'src/icons')],
-            symbolId: 'icon-[dir]-[name]'
+            symbolId: 'icon-[dir]-[name]',
+            inject: 'body-first',
+            customDomId: '__svg__icons__dom__',
         })
     ],
     resolve: {
@@ -48,4 +51,4 @@ export default defineConfig(async () => ({
             }
         }
     },
-}));
+});

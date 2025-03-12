@@ -10,7 +10,7 @@ import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import router from "./router/Router";
 
 import SvgIcon from "./components/SvgIcon/Index.vue"
-import 'vite-plugin-svg-icons/register'
+import 'virtual:svg-icons-register'
 
 // @ts-ignore
 import VMdEditor from '@kangc/v-md-editor';

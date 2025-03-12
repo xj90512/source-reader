@@ -17,7 +17,11 @@ export default defineConfig(async () => ({
         // 配置路径别名
         alias: {
             '@': resolve(__dirname, './src'),
+            '@router': resolve(__dirname, './src/router'),
+            '@components': resolve(__dirname, './src/components'),
+            '@assets': resolve(__dirname, './src/assets'),
         },
+        extensions: ['.js', '.ts', '.jsx', '.tsx', '.json', '.vue']
     },
     // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
     // prevent vite from obscuring rust errors
@@ -37,5 +41,11 @@ export default defineConfig(async () => ({
         minify: !process.env.TAURI_DEBUG ? "esbuild" : false,
         // produce sourcemaps for debug builds
         sourcemap: !!process.env.TAURI_DEBUG,
+        rollupOptions: {
+            external: [],
+            output: {
+                manualChunks: undefined
+            }
+        }
     },
 }));
